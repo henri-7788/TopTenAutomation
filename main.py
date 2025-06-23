@@ -1,6 +1,7 @@
 import yaml
-from reddit_downloader import download_reddit_videos
+import reddit_downloader
 from video_editor import create_compilation
+import os
 
 
 def load_config(path="config.yaml"):
@@ -10,10 +11,14 @@ def load_config(path="config.yaml"):
 def main():
     config = load_config()
     print("Konfiguration geladen.")
-    video_paths = download_reddit_videos(config)
+    # Download der Top 6 Videos, gibt Liste der Videopfad zurück
+    video_paths = reddit_downloader.download_top_videos(config, top_n=6)
     print(f"{len(video_paths)} Videos heruntergeladen.")
-    create_compilation(video_paths, config)
-    print("Fertiges Video erstellt!")
+    if video_paths:
+        create_compilation(video_paths, config)
+        print("Fertiges Video erstellt!")
+    else:
+        print("Keine Videos zum Erstellen der Compilation gefunden.")
 
 if __name__ == "__main__":
     main() 

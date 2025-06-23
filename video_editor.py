@@ -1,6 +1,7 @@
 import os
-from moviepy.editor import VideoFileClip, concatenate_videoclips, TextClip, CompositeVideoClip, AudioFileClip
-from PIL import ImageFont
+from moviepy import VideoFileClip, CompositeVideoClip, concatenate_videoclips
+from moviepy.video.VideoClip import TextClip
+from moviepy.audio.io.AudioFileClip import AudioFileClip
 
 def create_compilation(video_paths, config):
     clips = []
@@ -17,32 +18,35 @@ def create_compilation(video_paths, config):
 
     # Titel-Overlay vorbereiten
     title_clip = TextClip(
-        title,
-        fontsize=70,
+        text=title,
         font=font_path,
+        font_size=70,
         color=title_color,
+        bg_color=title_bg_color,
         size=(width, None),
         method='caption',
-        bg_color=title_bg_color
-    ).set_duration(2).set_position(('center', 0))
+        duration=2
+    )
+    title_clip = title_clip.with_position(('center', 0))
 
     for idx, path in enumerate(video_paths):
         try:
             clip = VideoFileClip(path).subclip(0, min(clip_length, VideoFileClip(path).duration))
             # Hochformat erzwingen
-            clip = clip.resize(height=height)
+            clip = clip.with_size(height=height)
             if clip.w != width:
-                clip = clip.crop(x_center=clip.w/2, width=width)
+                clip = clip.with_crop(x_center=clip.w/2, width=width)
             # Ranking-Overlay
             rank_text = f"{idx+1}."
             rank_clip = TextClip(
-                rank_text,
-                fontsize=60,
+                text=rank_text,
                 font=font_path,
+                font_size=60,
                 color=ranking_colors[idx] if idx < len(ranking_colors) else '#FFFFFF',
                 method='caption',
-                bg_color=None
-            ).set_duration(clip.duration).set_position((30, 30))
+                duration=clip.duration
+            )
+            rank_clip = rank_clip.with_position((30, 30))
             # Kombiniere Clip und Overlay
             composite = CompositeVideoClip([clip, rank_clip])
             clips.append(composite)
@@ -55,8 +59,8 @@ def create_compilation(video_paths, config):
     # Musik hinzufügen
     if music_path and os.path.exists(music_path):
         try:
-            music = AudioFileClip(music_path).volumex(0.2)
-            final = final.set_audio(music.set_duration(final.duration))
+            music = AudioFileClip(music_path).with_duration(final.duration).with_volume(0.2)
+            final = final.with_audio(music)
         except Exception as e:
             print(f"Fehler beim Hinzufügen der Musik: {e}")
 

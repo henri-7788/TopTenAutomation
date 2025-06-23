@@ -1,5 +1,6 @@
 praw
 yt-dlp
 moviepy
+ffmpeg
 pillow
 pyyaml 
