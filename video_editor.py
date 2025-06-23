@@ -1,6 +1,35 @@
 import os
-from moviepy.editor import VideoFileClip, concatenate_videoclips, TextClip, CompositeVideoClip, AudioFileClip
-from PIL import ImageFont
+from moviepy import (
+    VideoFileClip,
+    concatenate_videoclips,
+    CompositeVideoClip,
+    AudioFileClip,
+    ImageClip,
+)
+from PIL import ImageFont, ImageDraw, Image
+import numpy as np
+
+
+def _pillow_text_clip(text, font_path, fontsize, color, bg_color=None, size=None, duration=2):
+    """Create a TextClip using Pillow instead of ImageMagick."""
+    font = ImageFont.truetype(font_path, fontsize)
+    dummy = Image.new("RGBA", (1, 1))
+    draw = ImageDraw.Draw(dummy)
+    bbox = draw.multiline_textbbox((0, 0), text, font=font)
+    text_w = bbox[2] - bbox[0]
+    text_h = bbox[3] - bbox[1]
+    width = size[0] if size else text_w
+    height = size[1] if size and size[1] is not None else text_h
+    img = Image.new("RGBA", (width, height), bg_color or (0, 0, 0, 0))
+    draw = ImageDraw.Draw(img)
+    draw.multiline_text(
+        ((width - text_w) // 2, (height - text_h) // 2),
+        text,
+        font=font,
+        fill=color,
+        align="center",
+    )
+    return ImageClip(np.array(img)).set_duration(duration)
 
 def create_compilation(video_paths, config):
     clips = []
@@ -15,16 +44,16 @@ def create_compilation(video_paths, config):
     output_file = config['output_file']
     clip_length = config.get('clip_length_seconds', 30)
 
-    # Titel-Overlay vorbereiten
-    title_clip = TextClip(
+    # Titel-Overlay vorbereiten (ohne ImageMagick)
+    title_clip = _pillow_text_clip(
         title,
-        fontsize=70,
-        font=font_path,
-        color=title_color,
+        font_path,
+        70,
+        title_color,
+        bg_color=title_bg_color,
         size=(width, None),
-        method='caption',
-        bg_color=title_bg_color
-    ).set_duration(2).set_position(('center', 0))
+        duration=2,
+    ).set_position(('center', 0))
 
     for idx, path in enumerate(video_paths):
         try:
@@ -35,14 +64,14 @@ def create_compilation(video_paths, config):
                 clip = clip.crop(x_center=clip.w/2, width=width)
             # Ranking-Overlay
             rank_text = f"{idx+1}."
-            rank_clip = TextClip(
+            rank_clip = _pillow_text_clip(
                 rank_text,
-                fontsize=60,
-                font=font_path,
-                color=ranking_colors[idx] if idx < len(ranking_colors) else '#FFFFFF',
-                method='caption',
-                bg_color=None
-            ).set_duration(clip.duration).set_position((30, 30))
+                font_path,
+                60,
+                ranking_colors[idx] if idx < len(ranking_colors) else '#FFFFFF',
+                bg_color=None,
+                duration=clip.duration,
+            ).set_position((30, 30))
             # Kombiniere Clip und Overlay
             composite = CompositeVideoClip([clip, rank_clip])
             clips.append(composite)

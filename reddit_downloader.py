@@ -1,6 +1,6 @@
 import os
 import praw
-import subprocess
+from yt_dlp import YoutubeDL
 import re
 
 def clean_filename(title):
@@ -43,12 +43,13 @@ def download_reddit_videos(config):
             out_path = f"videos/{count+1}_{safe_title}.mp4"
             print(f"Lade Video: {post.url} -> {out_path}")
             try:
-                subprocess.run([
-                    'yt-dlp',
-                    '-f', 'mp4',
-                    '-o', out_path,
-                    post.url
-                ], check=True)
+                ydl_opts = {
+                    'format': 'mp4',
+                    'outtmpl': out_path,
+                    'quiet': True,
+                }
+                with YoutubeDL(ydl_opts) as ydl:
+                    ydl.download([post.url])
                 if os.path.exists(out_path):
                     video_paths.append(out_path)
                     count += 1
