@@ -1,0 +1,20 @@
+subreddit: unexpected
+number_of_clips: 6
+output_format: "mp4"
+video_resolution: "1080x1920"
+font: "assets/fonts/THEBOLDFONT-FREEVERSION.ttf"
+title: "TOP 6 UNEXPECTED MOMENTS"
+overlay:
+  title_color: "#FFFFFF"
+  title_bg_color: "#000000"
+  ranking_colors: ["#FFD700", "#C0C0C0", "#CD7F32", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
+  text_shadow: true
+music: "assets/music/background.mp3"
+output_file: "output/compilation.mp4"
+clip_length_seconds: 30
+reddit_sort: "top"
+reddit_time_filter: "week"
+reddit_limit: 20
+reddit_client_id: "fwmir9F6QS-6ymIN37r0dQ"
+reddit_client_secret: "rcqXM4RnpM6qu7qUFfhj-JsTXdzFnw"
+reddit_user_agent: "Destiny personal use script by u/Nearby_Swan_8171T" 

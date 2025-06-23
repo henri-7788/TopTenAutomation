@@ -1,0 +1,5 @@
+praw
+yt-dlp
+moviepy
+pillow
+pyyaml 
