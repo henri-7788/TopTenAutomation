@@ -27,15 +27,55 @@ def create_compilation(video_paths, config):
         method='caption',
         duration=2
     )
-    title_clip = title_clip.with_position(('center', 0))
+    
+    # Position setzen - versuche verschiedene Methoden
+    try:
+        title_clip = title_clip.with_position(('center', 0))
+    except AttributeError:
+        try:
+            title_clip = title_clip.set_position(('center', 0))
+        except AttributeError:
+            print("Warnung: Kann Position für Titel nicht setzen")
 
     for idx, path in enumerate(video_paths):
         try:
-            clip = VideoFileClip(path).subclip(0, min(clip_length, VideoFileClip(path).duration))
-            # Hochformat erzwingen
-            clip = clip.with_size(height=height)
-            if clip.w != width:
-                clip = clip.with_crop(x_center=clip.w/2, width=width)
+            # MoviePy 2.x kompatible Methode zum Zuschneiden
+            video_clip = VideoFileClip(path)
+            
+            # Versuche verschiedene Methoden zum Zuschneiden
+            try:
+                # Methode 1: with_subclip (MoviePy 2.x)
+                duration = min(clip_length, video_clip.duration)
+                clip = video_clip.with_subclip(0, duration)
+            except AttributeError:
+                try:
+                    # Methode 2: subclip (ältere MoviePy Versionen)
+                    duration = min(clip_length, video_clip.duration)
+                    clip = video_clip.subclip(0, duration)
+                except AttributeError:
+                    # Methode 3: Kein Zuschneiden, verwende den ganzen Clip
+                    print(f"Warnung: Kann Clip {path} nicht zuschneiden, verwende den ganzen Clip")
+                    clip = video_clip
+            
+            # Hochformat erzwingen - versuche verschiedene Methoden
+            try:
+                clip = clip.with_size(height=height)
+            except AttributeError:
+                try:
+                    clip = clip.resize(height=height)
+                except AttributeError:
+                    print(f"Warnung: Kann Clip {path} nicht in Größe ändern")
+            
+            # Crop falls nötig - versuche verschiedene Methoden
+            if hasattr(clip, 'w') and clip.w != width:
+                try:
+                    clip = clip.with_crop(x_center=clip.w/2, width=width)
+                except AttributeError:
+                    try:
+                        clip = clip.crop(x_center=clip.w/2, width=width)
+                    except AttributeError:
+                        print(f"Warnung: Kann Clip {path} nicht croppen")
+            
             # Ranking-Overlay
             rank_text = f"{idx+1}."
             rank_clip = TextClip(
@@ -46,10 +86,20 @@ def create_compilation(video_paths, config):
                 method='caption',
                 duration=clip.duration
             )
-            rank_clip = rank_clip.with_position((30, 30))
+            
+            # Position setzen - versuche verschiedene Methoden
+            try:
+                rank_clip = rank_clip.with_position((30, 30))
+            except AttributeError:
+                try:
+                    rank_clip = rank_clip.set_position((30, 30))
+                except AttributeError:
+                    print(f"Warnung: Kann Position für Ranking {idx+1} nicht setzen")
+            
             # Kombiniere Clip und Overlay
             composite = CompositeVideoClip([clip, rank_clip])
             clips.append(composite)
+            
         except Exception as e:
             print(f"Fehler beim Verarbeiten von {path}: {e}")
 
@@ -59,8 +109,34 @@ def create_compilation(video_paths, config):
     # Musik hinzufügen
     if music_path and os.path.exists(music_path):
         try:
-            music = AudioFileClip(music_path).with_duration(final.duration).with_volume(0.2)
-            final = final.with_audio(music)
+            music = AudioFileClip(music_path)
+            # Duration setzen - versuche verschiedene Methoden
+            try:
+                music = music.with_duration(final.duration)
+            except AttributeError:
+                try:
+                    music = music.set_duration(final.duration)
+                except AttributeError:
+                    print("Warnung: Kann Musik-Dauer nicht setzen")
+            
+            # Volume setzen - versuche verschiedene Methoden
+            try:
+                music = music.with_volume(0.2)
+            except AttributeError:
+                try:
+                    music = music.volumex(0.2)
+                except AttributeError:
+                    print("Warnung: Kann Musik-Volume nicht setzen")
+            
+            # Audio setzen - versuche verschiedene Methoden
+            try:
+                final = final.with_audio(music)
+            except AttributeError:
+                try:
+                    final = final.set_audio(music)
+                except AttributeError:
+                    print("Warnung: Kann Audio nicht setzen")
+                    
         except Exception as e:
             print(f"Fehler beim Hinzufügen der Musik: {e}")
 
@@ -69,4 +145,10 @@ def create_compilation(video_paths, config):
         os.makedirs(os.path.dirname(output_file))
     print(f"Exportiere fertiges Video nach {output_file}...")
     final.write_videofile(output_file, fps=30, codec='libx264', audio_codec='aac')
-    print("Video erfolgreich exportiert!") 
+    print("Video erfolgreich exportiert!")
+    
+    # Cleanup
+    final.close()
+    for clip in clips:
+        clip.close()
+    title_clip.close() 

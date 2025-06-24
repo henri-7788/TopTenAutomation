@@ -79,7 +79,8 @@ def download_video(url, output_path):
     try:
         subprocess.run([
             get_ytdlp_cmd(),
-            '-f', 'mp4',
+            '-f', 'bv*+ba/best',
+            '--merge-output-format', 'mp4',
             '-o', output_path,
             url
         ], check=True)

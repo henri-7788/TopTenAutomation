@@ -1,20 +1,21 @@
-subreddit: unexpected
-number_of_clips: 6
-output_format: "mp4"
-video_resolution: "1080x1920"
-font: "assets/fonts/THEBOLDFONT-FREEVERSION.ttf"
-title: "TOP 6 UNEXPECTED MOMENTS"
+# Reddit-Einstellungen
+subreddit: unexpected                    # Name des Subreddits, aus dem Videos heruntergeladen werden
+number_of_clips: 6                       # Anzahl der Videos, die heruntergeladen und verarbeitet werden
+output_format: "mp4"                     # Ausgabeformat des fertigen Videos
+video_resolution: "1080x1920"            # Auflösung des fertigen Videos (Breite x Höhe)
+font: "assets/fonts/THEBOLDFONT-FREEVERSION.ttf"  # Pfad zur Schriftart für Overlays
+title: "TOP 6 UNEXPECTED MOMENTS"        # Titel, der am Anfang des Videos angezeigt wird
 overlay:
-  title_color: "#FFFFFF"
-  title_bg_color: "#000000"
-  ranking_colors: ["#FFD700", "#C0C0C0", "#CD7F32", "#FFFFFF", "#FFFFFF", "#FFFFFF"]
-  text_shadow: true
-music: "assets/music/background.mp3"
-output_file: "output/compilation.mp4"
-clip_length_seconds: 30
-reddit_sort: "top"
-reddit_time_filter: "week"
-reddit_limit: 20
-reddit_client_id: "fwmir9F6QS-6ymIN37r0dQ"
-reddit_client_secret: "rcqXM4RnpM6qu7qUFfhj-JsTXdzFnw"
-reddit_user_agent: "Destiny personal use script by u/Nearby_Swan_8171T" 
+  title_color: "#FFFFFF"                 # Farbe des Titels (Hex-Code)
+  title_bg_color: "#000000"              # Hintergrundfarbe des Titels (Hex-Code)
+  ranking_colors: ["#FFD700", "#C0C0C0", "#CD7F32", "#FFFFFF", "#FFFFFF", "#FFFFFF"]  # Farben für Ranking-Nummern (Gold, Silber, Bronze, Weiß, Weiß, Weiß)
+  text_shadow: true                      # Schatten für Text-Overlays aktivieren
+music: "assets/music/background.mp3"     # Pfad zur Hintergrundmusik (optional, leer lassen für kein Audio)
+output_file: "output/compilation.mp4"    # Pfad und Name der fertigen Videodatei
+clip_length_seconds: 30                  # Maximale Länge jedes einzelnen Clips in Sekunden
+reddit_sort: "top"                       # Sortierung: "top", "hot", "new"
+reddit_time_filter: "week"               # Zeitfilter: "hour", "day", "week", "month", "year", "all"
+reddit_limit: 20                         # Anzahl der Posts, die durchsucht werden (max. 100)
+reddit_client_id: "fwmir9F6QS-6ymIN37r0dQ"  # Client ID von deiner Reddit App
+reddit_client_secret: "rcqXM4RnpM6qu7qUFfhj-JsTXdzFnw"  # Client Secret von deiner Reddit App
+reddit_user_agent: "Destiny personal use script by u/Nearby_Swan_8171T"  # User Agent (z.B. "MyBot/1.0") 
